@@ -132,3 +132,166 @@ test.describe('Game Listing and Navigation', () => {
     await expect(page).toHaveTitle(/Game Details - Tailspin Toys/);
   });
 });
+
+test.describe('Game Filtering', () => {
+  test('should display filter controls on home page', async ({ page }) => {
+    await page.goto('/');
+    
+    // Wait for the page to load
+    await page.waitForSelector('[data-testid="filter-controls"]', { timeout: 10000 });
+    
+    // Check that filter controls are visible
+    const filterControls = page.locator('[data-testid="filter-controls"]');
+    await expect(filterControls).toBeVisible();
+    
+    // Check that category filter dropdown exists
+    const categoryFilter = page.locator('[data-testid="category-filter"]');
+    await expect(categoryFilter).toBeVisible();
+    
+    // Check that publisher filter dropdown exists
+    const publisherFilter = page.locator('[data-testid="publisher-filter"]');
+    await expect(publisherFilter).toBeVisible();
+  });
+
+  test('should filter games by category', async ({ page }) => {
+    await page.goto('/');
+    
+    // Wait for games to load
+    await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
+    
+    // Get initial game count
+    const initialGameCards = page.locator('[data-testid="game-card"]');
+    const initialCount = await initialGameCards.count();
+    expect(initialCount).toBeGreaterThan(0);
+    
+    // Select a category from the dropdown
+    const categoryFilter = page.locator('[data-testid="category-filter"]');
+    await categoryFilter.selectOption({ index: 1 }); // Select first non-default option
+    
+    // Wait for the games to reload
+    await page.waitForTimeout(500);
+    
+    // Verify that URL contains the category filter parameter
+    await expect(page).toHaveURL(/category=/);
+  });
+
+  test('should filter games by publisher', async ({ page }) => {
+    await page.goto('/');
+    
+    // Wait for games to load
+    await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
+    
+    // Select a publisher from the dropdown
+    const publisherFilter = page.locator('[data-testid="publisher-filter"]');
+    await publisherFilter.selectOption({ index: 1 }); // Select first non-default option
+    
+    // Wait for the games to reload
+    await page.waitForTimeout(500);
+    
+    // Verify that URL contains the publisher filter parameter
+    await expect(page).toHaveURL(/publisher=/);
+  });
+
+  test('should filter games by both category and publisher', async ({ page }) => {
+    await page.goto('/');
+    
+    // Wait for games to load
+    await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
+    
+    // Select a category
+    const categoryFilter = page.locator('[data-testid="category-filter"]');
+    await categoryFilter.selectOption({ index: 1 });
+    
+    // Wait for the games to reload
+    await page.waitForTimeout(500);
+    
+    // Select a publisher
+    const publisherFilter = page.locator('[data-testid="publisher-filter"]');
+    await publisherFilter.selectOption({ index: 1 });
+    
+    // Wait for the games to reload
+    await page.waitForTimeout(500);
+    
+    // Verify that URL contains both filter parameters
+    await expect(page).toHaveURL(/category=/);
+    await expect(page).toHaveURL(/publisher=/);
+  });
+
+  test('should show clear filters button when filters are active', async ({ page }) => {
+    await page.goto('/');
+    
+    // Wait for games to load
+    await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
+    
+    // Clear filters button should not be visible initially
+    const clearButton = page.locator('[data-testid="clear-filters"]');
+    await expect(clearButton).not.toBeVisible();
+    
+    // Select a category to activate a filter
+    const categoryFilter = page.locator('[data-testid="category-filter"]');
+    await categoryFilter.selectOption({ index: 1 });
+    
+    // Wait for the games to reload
+    await page.waitForTimeout(500);
+    
+    // Clear filters button should now be visible
+    await expect(clearButton).toBeVisible();
+  });
+
+  test('should clear all filters when clicking clear button', async ({ page }) => {
+    await page.goto('/');
+    
+    // Wait for games to load
+    await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
+    
+    // Apply filters
+    const categoryFilter = page.locator('[data-testid="category-filter"]');
+    await categoryFilter.selectOption({ index: 1 });
+    await page.waitForTimeout(500);
+    
+    const publisherFilter = page.locator('[data-testid="publisher-filter"]');
+    await publisherFilter.selectOption({ index: 1 });
+    await page.waitForTimeout(500);
+    
+    // Click clear filters button
+    const clearButton = page.locator('[data-testid="clear-filters"]');
+    await clearButton.click();
+    
+    // Wait for the page to update
+    await page.waitForTimeout(500);
+    
+    // Verify URL no longer has filter parameters
+    const url = page.url();
+    expect(url).not.toContain('category=');
+    expect(url).not.toContain('publisher=');
+    
+    // Clear button should no longer be visible
+    await expect(clearButton).not.toBeVisible();
+  });
+
+  test('should preserve filters in URL for bookmarking', async ({ page }) => {
+    await page.goto('/');
+    
+    // Wait for games to load
+    await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
+    
+    // Apply a category filter
+    const categoryFilter = page.locator('[data-testid="category-filter"]');
+    await categoryFilter.selectOption({ index: 1 });
+    await page.waitForTimeout(500);
+    
+    // Get the current URL with filter
+    const filteredUrl = page.url();
+    expect(filteredUrl).toContain('category=');
+    
+    // Navigate away and back using the filtered URL
+    await page.goto('/about');
+    await page.goto(filteredUrl);
+    
+    // Wait for games to load
+    await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
+    
+    // Verify the filter is still applied (URL should still have the parameter)
+    await expect(page).toHaveURL(/category=/);
+  });
+});
