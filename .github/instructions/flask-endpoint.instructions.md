@@ -18,4 +18,6 @@
 ## Prototype files
 
 - [Endpoint prototype](../../server/routes/games.py)
+- [Publishers endpoint](../../server/routes/publishers.py)
 - [Tests prototype](../../server/tests/test_games.py)
+- [Publishers tests](../../server/tests/test_publishers.py)
