@@ -88,3 +88,178 @@ def get_game(id: int) -> tuple[Response, int] | Response:
     game = game_query.to_dict()
     
     return jsonify(game)
+
+
+@games_bp.route('/api/games', methods=['POST'])
+def create_game() -> tuple[Response, int]:
+    """
+    Create a new game.
+    
+    Expected JSON body:
+        title (str): The title of the game (required, min 2 characters).
+        description (str): The description of the game (required, min 10 characters).
+        category_id (int): The ID of the category (required).
+        publisher_id (int): The ID of the publisher (required).
+        star_rating (float, optional): The star rating of the game (0-5).
+    
+    Returns:
+        Response: JSON object with the created game data and 201 status code.
+        Error responses: 400 for validation errors, 404 for invalid category/publisher.
+    """
+    try:
+        data = request.get_json(silent=True)
+        
+        # Validate required fields
+        if not data:
+            return jsonify({"error": "Request body is required"}), 400
+        
+        required_fields = ['title', 'description', 'category_id', 'publisher_id']
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            return jsonify({"error": f"Missing required fields: {', '.join(missing_fields)}"}), 400
+        
+        # Validate category and publisher exist
+        category = Category.query.get(data['category_id'])
+        if not category:
+            return jsonify({"error": "Category not found"}), 404
+        
+        publisher = Publisher.query.get(data['publisher_id'])
+        if not publisher:
+            return jsonify({"error": "Publisher not found"}), 404
+        
+        # Validate star_rating if provided
+        star_rating = data.get('star_rating')
+        if star_rating is not None:
+            try:
+                star_rating = float(star_rating)
+                if star_rating < 0 or star_rating > 5:
+                    return jsonify({"error": "Star rating must be between 0 and 5"}), 400
+            except (ValueError, TypeError):
+                return jsonify({"error": "Star rating must be a number"}), 400
+        
+        # Create new game
+        new_game = Game(
+            title=data['title'],
+            description=data['description'],
+            category_id=data['category_id'],
+            publisher_id=data['publisher_id'],
+            star_rating=star_rating
+        )
+        
+        db.session.add(new_game)
+        db.session.commit()
+        
+        # Return the created game
+        game_query = get_games_base_query().filter(Game.id == new_game.id).first()
+        return jsonify(game_query.to_dict()), 201
+        
+    except ValueError as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "An error occurred while creating the game"}), 500
+
+
+@games_bp.route('/api/games/<int:id>', methods=['PUT'])
+def update_game(id: int) -> tuple[Response, int]:
+    """
+    Update an existing game.
+    
+    Args:
+        id: The ID of the game to update.
+    
+    Expected JSON body (all fields optional):
+        title (str): The title of the game (min 2 characters).
+        description (str): The description of the game (min 10 characters).
+        category_id (int): The ID of the category.
+        publisher_id (int): The ID of the publisher.
+        star_rating (float): The star rating of the game (0-5).
+    
+    Returns:
+        Response: JSON object with the updated game data and 200 status code.
+        Error responses: 400 for validation errors, 404 for game/category/publisher not found.
+    """
+    try:
+        # Find the game
+        game = Game.query.get(id)
+        if not game:
+            return jsonify({"error": "Game not found"}), 404
+        
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({"error": "Request body is required"}), 400
+        
+        # Update title if provided
+        if 'title' in data:
+            game.title = data['title']
+        
+        # Update description if provided
+        if 'description' in data:
+            game.description = data['description']
+        
+        # Update category_id if provided
+        if 'category_id' in data:
+            category = Category.query.get(data['category_id'])
+            if not category:
+                return jsonify({"error": "Category not found"}), 404
+            game.category_id = data['category_id']
+        
+        # Update publisher_id if provided
+        if 'publisher_id' in data:
+            publisher = Publisher.query.get(data['publisher_id'])
+            if not publisher:
+                return jsonify({"error": "Publisher not found"}), 404
+            game.publisher_id = data['publisher_id']
+        
+        # Update star_rating if provided
+        if 'star_rating' in data:
+            star_rating = data['star_rating']
+            if star_rating is not None:
+                try:
+                    star_rating = float(star_rating)
+                    if star_rating < 0 or star_rating > 5:
+                        return jsonify({"error": "Star rating must be between 0 and 5"}), 400
+                except (ValueError, TypeError):
+                    return jsonify({"error": "Star rating must be a number"}), 400
+            game.star_rating = star_rating
+        
+        db.session.commit()
+        
+        # Return the updated game
+        game_query = get_games_base_query().filter(Game.id == id).first()
+        return jsonify(game_query.to_dict()), 200
+        
+    except ValueError as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "An error occurred while updating the game"}), 500
+
+
+@games_bp.route('/api/games/<int:id>', methods=['DELETE'])
+def delete_game(id: int) -> tuple[Response, int]:
+    """
+    Delete a game by ID.
+    
+    Args:
+        id: The ID of the game to delete.
+    
+    Returns:
+        Response: JSON object with success message and 200 status code.
+        Error responses: 404 if game not found.
+    """
+    try:
+        game = Game.query.get(id)
+        if not game:
+            return jsonify({"error": "Game not found"}), 404
+        
+        db.session.delete(game)
+        db.session.commit()
+        
+        return jsonify({"message": "Game deleted successfully"}), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "An error occurred while deleting the game"}), 500
