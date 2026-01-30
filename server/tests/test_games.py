@@ -370,6 +370,50 @@ class TestGamesRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn('error', data)
 
+    def test_create_game_title_too_short(self) -> None:
+        """Test creating a game with title shorter than 2 characters"""
+        new_game = {
+            'title': 'A',
+            'description': 'This is a valid description',
+            'category_id': 1,
+            'publisher_id': 1,
+            'star_rating': 4.5
+        }
+        
+        # Act
+        response = self.client.post(
+            self.GAMES_API_PATH,
+            data=json.dumps(new_game),
+            content_type='application/json'
+        )
+        data = self._get_response_data(response)
+        
+        # Assert
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('error', data)
+
+    def test_create_game_description_too_short(self) -> None:
+        """Test creating a game with description shorter than 10 characters"""
+        new_game = {
+            'title': 'Valid Title',
+            'description': 'Too short',
+            'category_id': 1,
+            'publisher_id': 1,
+            'star_rating': 4.5
+        }
+        
+        # Act
+        response = self.client.post(
+            self.GAMES_API_PATH,
+            data=json.dumps(new_game),
+            content_type='application/json'
+        )
+        data = self._get_response_data(response)
+        
+        # Assert
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('error', data)
+
     # Tests for PUT /api/games/<id>
     def test_update_game_success(self) -> None:
         """Test successful update of an existing game"""
@@ -474,6 +518,76 @@ class TestGamesRoutes(unittest.TestCase):
         # Act
         response = self.client.put(
             f'{self.GAMES_API_PATH}/{game_id}',
+            content_type='application/json'
+        )
+        data = self._get_response_data(response)
+        
+        # Assert
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('error', data)
+
+    def test_update_game_clear_star_rating(self) -> None:
+        """Test updating a game to clear star rating (set to None)"""
+        # Get the first game
+        response = self.client.get(self.GAMES_API_PATH)
+        games = self._get_response_data(response)
+        game_id = games[0]['id']
+        
+        # Update with null star_rating
+        update_data = {
+            'star_rating': None
+        }
+        
+        # Act
+        response = self.client.put(
+            f'{self.GAMES_API_PATH}/{game_id}',
+            data=json.dumps(update_data),
+            content_type='application/json'
+        )
+        data = self._get_response_data(response)
+        
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(data['starRating'])
+
+    def test_update_game_title_too_short(self) -> None:
+        """Test updating a game with title shorter than 2 characters"""
+        # Get the first game
+        response = self.client.get(self.GAMES_API_PATH)
+        games = self._get_response_data(response)
+        game_id = games[0]['id']
+        
+        update_data = {
+            'title': 'A'
+        }
+        
+        # Act
+        response = self.client.put(
+            f'{self.GAMES_API_PATH}/{game_id}',
+            data=json.dumps(update_data),
+            content_type='application/json'
+        )
+        data = self._get_response_data(response)
+        
+        # Assert
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('error', data)
+
+    def test_update_game_description_too_short(self) -> None:
+        """Test updating a game with description shorter than 10 characters"""
+        # Get the first game
+        response = self.client.get(self.GAMES_API_PATH)
+        games = self._get_response_data(response)
+        game_id = games[0]['id']
+        
+        update_data = {
+            'description': 'Too short'
+        }
+        
+        # Act
+        response = self.client.put(
+            f'{self.GAMES_API_PATH}/{game_id}',
+            data=json.dumps(update_data),
             content_type='application/json'
         )
         data = self._get_response_data(response)

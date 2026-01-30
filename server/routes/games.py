@@ -220,9 +220,11 @@ def update_game(id: int) -> tuple[Response, int]:
                     star_rating = float(star_rating)
                     if star_rating < 0 or star_rating > 5:
                         return jsonify({"error": "Star rating must be between 0 and 5"}), 400
+                    game.star_rating = star_rating
                 except (ValueError, TypeError):
                     return jsonify({"error": "Star rating must be a number"}), 400
-            game.star_rating = star_rating
+            else:
+                game.star_rating = star_rating
         
         db.session.commit()
         
