@@ -1,3 +1,7 @@
+"""
+Flask application entry point.
+Initializes the Flask app, database, and registers all route blueprints.
+"""
 import os
 from flask import Flask
 from models import init_db

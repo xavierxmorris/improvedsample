@@ -1,3 +1,7 @@
+"""
+Game model module.
+Defines the Game model for representing games in the crowdfunding platform.
+"""
 from . import db
 from .base import BaseModel
 from sqlalchemy.orm import validates, relationship
@@ -20,18 +24,51 @@ class Game(BaseModel):
     
     @validates('title')
     def validate_name(self, key, name):
+        """
+        Validate the game title field.
+        
+        Args:
+            key: The name of the field being validated.
+            name: The title value to validate.
+        
+        Returns:
+            The validated title string.
+        """
         return self.validate_string_length('Game title', name, min_length=2)
     
     @validates('description')
     def validate_description(self, key, description):
+        """
+        Validate the game description field.
+        
+        Args:
+            key: The name of the field being validated.
+            description: The description value to validate.
+        
+        Returns:
+            The validated description string or None if allowed.
+        """
         if description is not None:
             return self.validate_string_length('Description', description, min_length=10, allow_none=True)
         return description
     
     def __repr__(self):
+        """
+        Return a string representation of the Game object.
+        
+        Returns:
+            A string containing the game title and ID.
+        """
         return f'<Game {self.title}, ID: {self.id}>'
 
     def to_dict(self):
+        """
+        Convert the Game object to a dictionary representation.
+        
+        Returns:
+            A dictionary containing game attributes including id, title, description,
+            publisher info, category info, and star rating.
+        """
         return {
             'id': self.id,
             'title': self.title,

@@ -1,3 +1,7 @@
+"""
+Unit tests for the games API endpoints.
+Tests the functionality of game-related routes including filtering and retrieval.
+"""
 import unittest
 import json
 from typing import Dict, List, Any, Optional
@@ -38,7 +42,12 @@ class TestGamesRoutes(unittest.TestCase):
     GAMES_API_PATH: str = '/api/games'
 
     def setUp(self) -> None:
-        """Set up test database and seed data"""
+        """
+        Set up test database and seed data.
+        
+        Creates an in-memory SQLite database and populates it with test fixtures
+        before each test method.
+        """
         # Create a fresh Flask app for testing
         self.app = Flask(__name__)
         self.app.config['TESTING'] = True
@@ -60,14 +69,24 @@ class TestGamesRoutes(unittest.TestCase):
             self._seed_test_data()
 
     def tearDown(self) -> None:
-        """Clean up test database and ensure proper connection closure"""
+        """
+        Clean up test database and ensure proper connection closure.
+        
+        Removes the session, drops all tables, and disposes of the database engine
+        after each test method.
+        """
         with self.app.app_context():
             db.session.remove()
             db.drop_all()
             db.engine.dispose()
 
     def _seed_test_data(self) -> None:
-        """Helper method to seed test data"""
+        """
+        Helper method to seed test data.
+        
+        Populates the test database with publishers, categories, and games
+        based on the TEST_DATA class variable.
+        """
         # Create test publishers
         publishers = [
             Publisher(**publisher_data) for publisher_data in self.TEST_DATA["publishers"]
@@ -100,7 +119,15 @@ class TestGamesRoutes(unittest.TestCase):
         db.session.commit()
 
     def _get_response_data(self, response: Response) -> Any:
-        """Helper method to parse response data"""
+        """
+        Helper method to parse response data.
+        
+        Args:
+            response: The Flask test client response object.
+        
+        Returns:
+            The parsed JSON data from the response.
+        """
         return json.loads(response.data)
 
     def test_get_games_success(self) -> None:

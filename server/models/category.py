@@ -1,3 +1,7 @@
+"""
+Category model module.
+Defines the Category model for organizing games in the crowdfunding platform.
+"""
 from . import db
 from .base import BaseModel
 from sqlalchemy.orm import validates, relationship
@@ -14,16 +18,49 @@ class Category(BaseModel):
     
     @validates('name')
     def validate_name(self, key, name):
+        """
+        Validate the category name field.
+        
+        Args:
+            key: The name of the field being validated.
+            name: The category name to validate.
+        
+        Returns:
+            The validated name string.
+        """
         return self.validate_string_length('Category name', name, min_length=2)
         
     @validates('description')
     def validate_description(self, key, description):
+        """
+        Validate the category description field.
+        
+        Args:
+            key: The name of the field being validated.
+            description: The description value to validate.
+        
+        Returns:
+            The validated description string or None if allowed.
+        """
         return self.validate_string_length('Description', description, min_length=10, allow_none=True)
     
     def __repr__(self):
+        """
+        Return a string representation of the Category object.
+        
+        Returns:
+            A string containing the category name.
+        """
         return f'<Category {self.name}>'
         
     def to_dict(self):
+        """
+        Convert the Category object to a dictionary representation.
+        
+        Returns:
+            A dictionary containing category attributes including id, name,
+            description, and game count.
+        """
         return {
             'id': self.id,
             'name': self.name,

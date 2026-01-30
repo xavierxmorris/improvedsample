@@ -1,3 +1,7 @@
+"""
+Database seeding module.
+Provides functionality to populate the database with initial game, category, and publisher data.
+"""
 import csv
 import os
 import random
@@ -78,6 +82,12 @@ def create_games():
         print(f"Added {game_count} games with {len(categories)} categories and {len(publishers)} publishers")
 
 def seed_database():
+    """
+    Seed the database with initial game data.
+    
+    This is the main entry point for populating the database with games, 
+    categories, and publishers from CSV data.
+    """
     create_games()
 
 if __name__ == '__main__':

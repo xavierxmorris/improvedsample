@@ -1,3 +1,7 @@
+"""
+Astro middleware module.
+Handles API request forwarding from the Astro frontend to the Flask backend server.
+"""
 import { defineMiddleware } from "astro:middleware";
 
 // Get server URL from environment variable with fallback for local development
