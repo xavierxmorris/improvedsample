@@ -16,6 +16,10 @@ A script file has been created to launch the site. You can run it by:
 
 Then navigate to the [website](http://localhost:4321) to see the site!
 
+## API Endpoints
+
+- `GET /api/publishers` - Get all publishers (returns id and name)
+
 ## License 
 
 This project is licensed under the terms of the MIT open source license. Please refer to the [LICENSE](./LICENSE) for the full terms.

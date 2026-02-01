@@ -58,6 +58,7 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 - `server/`: Flask backend code
   - `models/`: SQLAlchemy ORM models
   - `routes/`: API endpoints organized by resource
+    - `publishers.py`: Publisher-related endpoints
   - `tests/`: Unit tests for the API
   - `utils/`: Utility functions and helpers
 - `client/`: Astro/Svelte frontend code
