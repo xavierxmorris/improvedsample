@@ -1,3 +1,7 @@
+<!--
+GameList component.
+Displays a list of games with filtering capabilities by category and publisher.
+-->
 <script lang="ts">
     import { onMount } from "svelte";
 
@@ -74,6 +78,9 @@
         }
     };
 
+    /**
+     * Fetch the list of games from the API, applying current filters.
+     */
     const fetchGames = async () => {
         loading = true;
         try {
@@ -90,6 +97,9 @@
         }
     };
 
+    /**
+     * Fetch the list of categories from the API.
+     */
     const fetchCategories = async () => {
         try {
             const response = await fetch('/api/categories/');
@@ -101,6 +111,9 @@
         }
     };
 
+    /**
+     * Fetch the list of publishers from the API.
+     */
     const fetchPublishers = async () => {
         try {
             const response = await fetch('/api/publishers/');

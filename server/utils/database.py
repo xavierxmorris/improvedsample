@@ -1,3 +1,7 @@
+"""
+Database initialization module.
+Provides functions to initialize and configure the database connection for the Flask application.
+"""
 import os
 from models import init_db as models_init_db
 

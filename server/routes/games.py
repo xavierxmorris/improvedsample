@@ -77,6 +77,15 @@ def get_games() -> Response:
 
 @games_bp.route('/api/games/<int:id>', methods=['GET'])
 def get_game(id: int) -> tuple[Response, int] | Response:
+    """
+    Retrieve a specific game by its ID.
+    
+    Args:
+        id: The unique identifier of the game to retrieve.
+    
+    Returns:
+        Response: JSON object containing the game details, or error message with 404 status if not found.
+    """
     # Use the base query and add filter for specific game
     game_query = get_games_base_query().filter(Game.id == id).first()
     

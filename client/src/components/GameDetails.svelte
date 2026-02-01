@@ -1,3 +1,7 @@
+<!--
+GameDetails component.
+Displays detailed information about a single game including title, description, rating, and metadata.
+-->
 <script lang="ts">
     import { onMount } from "svelte";
     
@@ -52,7 +56,12 @@
         }
     });
 
-    // Function to render stars based on rating
+    /**
+     * Function to render stars based on rating.
+     * 
+     * @param rating - The numeric rating value (0-5) or null.
+     * @returns A string representation of the rating using star symbols.
+     */
     function renderStarRating(rating: number | null): string {
         if (rating === null) return "Not yet rated";
         
